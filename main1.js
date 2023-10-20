@@ -177,7 +177,7 @@ function increaseScore() {
 }
 
 function decreaseTime() {
-  time--;
+  time -= 1;
 }
 
 // 스페이스바 입력 확인
