@@ -9,6 +9,8 @@ canvas.height = 600;
 // 게임 변수 초기화
 let score = 0;
 let scoreInterval;
+let time = 60;
+let timeInterval;
 let timer = 0;
 let animation;
 let jump = false;
@@ -125,10 +127,11 @@ function moveObstacles() {
 function checkCollisions() {
   for (const obstacle of obstacles) {
     if (
-      character.x < obstacle.x + obstacle.width - 110 && // 캐릭터의 왼쪽 경계가 장애물의 오른쪽 경계보다 왼쪽에 있고
-      character.x + character.width > obstacle.x && // 캐릭터의 오른쪽 경계가 장애물의 왼쪽 경계보다 오른쪽에 있으며
-      character.y < obstacle.y + obstacle.height - 10 && // 캐릭터의 상단 경계가 장애물의 하단 경계보다 위쪽에 있고
-      character.y + character.height > obstacle.y
+      (character.x < obstacle.x + obstacle.width - 110 && // 캐릭터의 왼쪽 경계가 장애물의 오른쪽 경계보다 왼쪽에 있고
+        character.x + character.width > obstacle.x && // 캐릭터의 오른쪽 경계가 장애물의 왼쪽 경계보다 오른쪽에 있으며
+        character.y < obstacle.y + obstacle.height - 10 && // 캐릭터의 상단 경계가 장애물의 하단 경계보다 위쪽에 있고
+        character.y + character.height > obstacle.y) ||
+      time === 0
     ) {
       // 캐릭터의 하단 경계가 장애물의 상단 경계보다 아래쪽에 있으면
       endGame(); // 게임을 종료함
@@ -159,12 +162,22 @@ function endGame() {
 function drawScore() {
   ctx.fillStyle = "black";
   ctx.font = "24px Arial";
-  ctx.fillText(`Score: ${score}`, 20, 20);
+  ctx.fillText(`Score: ${score}`, 20, 30);
+}
+
+function drawTime() {
+  ctx.fillStyle = "black";
+  ctx.font = "24px Arial";
+  ctx.fillText(`Time: ${time}`, 180, 30);
 }
 
 // 스코어를 1씩 증가시키는 함수
 function increaseScore() {
   score++;
+}
+
+function decreaseTime() {
+  time--;
 }
 
 // 스페이스바 입력 확인
@@ -264,6 +277,7 @@ function animate() {
   }
 
   drawScore();
+  drawTime();
   character.draw();
 }
 
@@ -274,6 +288,8 @@ playBtn.addEventListener("click", function () {
   animation = requestAnimationFrame(animate);
   score = 0;
   scoreInterval = setInterval(increaseScore, 1000);
+  time = 60;
+  timeInterval = setInterval(decreaseTime, 1000);
   playBtn.style.display = "none";
 });
 
