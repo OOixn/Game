@@ -3,8 +3,8 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 
 // Canvas 크기 설정
-canvas.width = window.innerWidth - 100;
-canvas.height = window.innerHeight - 100;
+canvas.width = 1000;
+canvas.height = 600;
 
 // 게임 변수 초기화
 let score = 0;
@@ -32,7 +32,7 @@ imgBasic.onload = () => {
 // 캐릭터
 let character = {
   x: 20,
-  y: canvas.height - 265,
+  y: canvas.height - 240,
   width: 70,
   height: 120,
   img: imgBasic,
@@ -104,9 +104,9 @@ function getRandomObstacle() {
   let y;
   // 장애물 종류에 따라 y 좌표 설정
   if (randomIndex === 2) {
-    y = canvas.height - 250 - type.height; // index 2 장애물의 y 위치
+    y = canvas.height - 220 - type.height; // index 2 장애물의 y 위치
   } else {
-    y = canvas.height - 150 - type.height; // 일반 장애물의 y 위치
+    y = canvas.height - 120 - type.height; // 일반 장애물의 y 위치
   }
   // 새로운 장애물 객체를 생성하여 반환
   return new Obstacle(x, y, type.width, type.height, type.speed, type.image);
@@ -182,15 +182,15 @@ imgJump.onload = function () {
 imgDown.onload = function () {
   document.addEventListener("keydown", function (e) {
     if (e.code === "ArrowDown") {
-      // 아래 방향키를 눌렀을 경우 캐릭터 y위치가 canvas.height - 260 보다 작을 경우만 엎드림
-      if (character.y < canvas.height - 260) {
+      // 아래 방향키를 눌렀을 경우 캐릭터 y위치가 canvas.height - 240 보다 작을 경우만 엎드림
+      if (character.y < canvas.height - 235) {
         character.width = 115;
         character.height = 75;
         character.img = imgDown;
         down = true;
 
         // 캐릭터의 너비와 높이 값을 변경하게 되면 하늘에 뜬 것처럼 되어 y좌표를 조정
-        character.y += 40;
+        character.y += 50;
 
         // 캐릭터의 충돌 박스 정보를 저장
         character.collisionX = character.x;
@@ -208,7 +208,7 @@ document.addEventListener("keyup", function (e) {
     character.width = 70;
     character.height = 120;
     down = false;
-    character.y -= 40;
+    character.y -= 50;
     character.img = imgBasic;
   }
 });
@@ -241,18 +241,18 @@ function animate() {
   // 점프
   if (jump == true) {
     // 점프 상태인 경우 캐릭터의 y 좌표가 300보다 크면
-    if (character.y > 300) {
+    if (character.y > 250) {
       character.y -= 5; // 점프 속도 5
     } else {
       // 캐릭터가 점프 중인데 300에 도달한 경우 점프 상태를 해제함
-      character.y = 300;
+      character.y = 250;
       jump = false;
     }
   }
 
   if (jump == false) {
     // 점프 상태가 아닌 경우 이미지를 기본 이미지로 변경, 캐릭터가 y 좌표 canvas.height - 265까지 내려오게 함
-    if (character.y < canvas.height - 265) {
+    if (character.y < canvas.height - 240) {
       character.y += 5; // 내려오는 속도 5
       character.img = imgBasic;
     }
