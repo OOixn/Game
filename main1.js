@@ -16,7 +16,8 @@ let animation;
 let jump = false;
 let jumpTimer = 0;
 let down = false;
-
+let life = 3;
+let lifeInterval;
 // 캐릭터 이미지 로드
 let imgBasic = new Image();
 imgBasic.src = "./img/basic.png";
@@ -27,13 +28,16 @@ imgJump.src = "./img/jump.png";
 const imgDown = new Image();
 imgDown.src = "./img/Down.png";
 
+const imgHit = new Image();
+imgHit.src = "./img/hit.png";
+
 imgBasic.onload = () => {
   character.draw();
 };
 
 // 캐릭터
 let character = {
-  x: 20,
+  x: 90,
   y: canvas.height - 240,
   width: 70,
   height: 120,
@@ -56,7 +60,7 @@ imgObstacle2.src = "./img/2.png";
 obstacleImages.push(imgObstacle2);
 
 const imgObstacle3 = new Image();
-imgObstacle3.src = "./img/3.png";
+imgObstacle3.src = "./img/32.png";
 obstacleImages.push(imgObstacle3);
 
 // 장애물 종류를 나타내는 클래스
@@ -72,6 +76,8 @@ class Obstacle {
 
   draw() {
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+    // ctx.fillStyle = "red";
+    // ctx.fillRect(this.x, this.y, this.width, this.height);
   }
 
   move() {
@@ -84,7 +90,7 @@ const obstacles = [];
 const obstacleTypes = [
   { width: 50, height: 46, speed: 2, image: obstacleImages[0] },
   { width: 51, height: 39, speed: 3, image: obstacleImages[1] },
-  { width: 50, height: 50, speed: 4, image: obstacleImages[2] },
+  { width: 50, height: 30, speed: 4, image: obstacleImages[2] },
 ];
 
 // 초기 장애물을 생성하는 함수
@@ -122,20 +128,39 @@ function moveObstacles() {
     obstacle.move();
   }
 }
+let invincible = false; // 무적 상태 변수
+
+function makeCharacterInvincible() {
+  if (!invincible) {
+    invincible = true;
+    // 일정 시간 후 무적 상태 해제
+    character.img = imgHit;
+    setTimeout(() => {
+      invincible = false;
+      character.img = imgBasic;
+    }, 2000); // 2000ms(2초) 동안 무적 상태 유지
+  }
+}
 
 // 충돌 확인
 function checkCollisions() {
   for (const obstacle of obstacles) {
     if (
-      (character.x < obstacle.x + obstacle.width - 110 && // 캐릭터의 왼쪽 경계가 장애물의 오른쪽 경계보다 왼쪽에 있고
-        character.x + character.width > obstacle.x && // 캐릭터의 오른쪽 경계가 장애물의 왼쪽 경계보다 오른쪽에 있으며
-        character.y < obstacle.y + obstacle.height - 10 && // 캐릭터의 상단 경계가 장애물의 하단 경계보다 위쪽에 있고
-        character.y + character.height > obstacle.y) ||
-      time === 0
+      !invincible &&
+      character.x < obstacle.x + obstacle.width - 50 && // 캐릭터의 왼쪽 경계가 장애물의 오른쪽 경계보다 왼쪽에 있고
+      character.x + character.width > obstacle.x + 20 && // 캐릭터의 오른쪽 경계가 장애물의 왼쪽 경계보다 오른쪽에 있으며
+      character.y < obstacle.y + obstacle.height && // 캐릭터의 상단 경계가 장애물의 하단 경계보다 위쪽에 있고
+      character.y + character.height > obstacle.y
     ) {
-      // 캐릭터의 하단 경계가 장애물의 상단 경계보다 아래쪽에 있으면
-      endGame(); // 게임을 종료함
+      life--;
+      // 충돌 시 캐릭터를 일시적으로 무적 상태로 설정
+      makeCharacterInvincible();
     }
+  }
+}
+function dd() {
+  if (life === 0 || time === 0) {
+    endGame();
   }
 }
 
@@ -143,8 +168,7 @@ function checkCollisions() {
 function endGame() {
   // 현재 게임 애니메이션 프레임 초기화
   cancelAnimationFrame(animation);
-  // 스코어 인터벌을 초기화
-  clearInterval(scoreInterval);
+
   // 장애물 배열을 초기화
   obstacles.length = 0;
 
@@ -169,6 +193,12 @@ function drawTime() {
   ctx.fillStyle = "black";
   ctx.font = "24px Arial";
   ctx.fillText(`Time: ${time}`, 180, 30);
+}
+
+function drawLife() {
+  ctx.fillStyle = "black";
+  ctx.font = "24px Arial";
+  ctx.fillText(`Life: ${life}`, 300, 30);
 }
 
 // 스코어를 1씩 증가시키는 함수
@@ -250,15 +280,15 @@ function animate() {
 
   // 충돌 확인
   checkCollisions();
-
+  dd();
   // 점프
   if (jump == true) {
-    // 점프 상태인 경우 캐릭터의 y 좌표가 300보다 크면
-    if (character.y > 250) {
+    // 점프 상태인 경우 캐릭터의 y 좌표가 200보다 크면
+    if (character.y > 200) {
       character.y -= 5; // 점프 속도 5
     } else {
-      // 캐릭터가 점프 중인데 300에 도달한 경우 점프 상태를 해제함
-      character.y = 250;
+      // 캐릭터가 점프 중인데 200에 도달한 경우 점프 상태를 해제함
+      character.y = 200;
       jump = false;
     }
   }
@@ -278,12 +308,16 @@ function animate() {
 
   drawScore();
   drawTime();
+  drawLife();
   character.draw();
 }
 
 let playBtn = document.getElementById("playBtn");
 
 playBtn.addEventListener("click", function () {
+  clearInterval(scoreInterval);
+  clearInterval(timeInterval);
+
   cancelAnimationFrame(animation);
   animation = requestAnimationFrame(animate);
   score = 0;
@@ -291,7 +325,8 @@ playBtn.addEventListener("click", function () {
   time = 60;
   timeInterval = setInterval(decreaseTime, 1000);
   playBtn.style.display = "none";
-});
+  life = 3;
 
-// 초기화 함수 호출
-initObstacles();
+  // 초기화 함수 호출
+  initObstacles();
+});
