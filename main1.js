@@ -90,7 +90,7 @@ const obstacles = [];
 const obstacleTypes = [
   { width: 50, height: 46, speed: 2, image: obstacleImages[0] },
   { width: 51, height: 39, speed: 3, image: obstacleImages[1] },
-  { width: 50, height: 30, speed: 4, image: obstacleImages[2] },
+  { width: 50, height: 30, speed: 6.5, image: obstacleImages[2] },
 ];
 
 // 초기 장애물을 생성하는 함수
@@ -137,7 +137,9 @@ function makeCharacterInvincible() {
     character.img = imgHit;
     setTimeout(() => {
       invincible = false;
-      character.img = imgBasic;
+      if (!jump && !down) {
+        character.img = imgBasic;
+      }
     }, 2000); // 2000ms(2초) 동안 무적 상태 유지
   }
 }
@@ -213,8 +215,8 @@ function decreaseTime() {
 // 스페이스바 입력 확인
 imgJump.onload = function () {
   document.addEventListener("keydown", function (e) {
-    // 만약 이벤트의 키 코드가 "Space" (스페이스바)인 경우 이미지를 점프 이미지로 변경하고 점프 상태로 만들어줌
-    if (e.code === "Space") {
+    if (e.code === "Space" && !jump && character.y === canvas.height - 240) {
+      // 바닥에 있을 때만 점프 허용
       character.img = imgJump;
       jump = true;
     }
@@ -224,7 +226,8 @@ imgJump.onload = function () {
 // 방향키 아래 버튼 입력 확인
 imgDown.onload = function () {
   document.addEventListener("keydown", function (e) {
-    if (e.code === "ArrowDown") {
+    if (e.code === "ArrowDown" && !jump && !down && character.y === canvas.height - 240) {
+      // 바닥에 있을 때만 아래 방향키 허용
       // 아래 방향키를 눌렀을 경우 캐릭터 y위치가 canvas.height - 240 보다 작을 경우만 엎드림
       if (character.y < canvas.height - 235) {
         character.width = 115;
@@ -247,7 +250,7 @@ imgDown.onload = function () {
 
 //방향키 아래 버튼 떼어졌을시 다시 기본 값으로 조정
 document.addEventListener("keyup", function (e) {
-  if (e.code === "ArrowDown") {
+  if (e.code === "ArrowDown" && character.y === canvas.height - 190) {
     character.width = 70;
     character.height = 120;
     down = false;
@@ -281,6 +284,7 @@ function animate() {
   // 충돌 확인
   checkCollisions();
   dd();
+
   // 점프
   if (jump == true) {
     // 점프 상태인 경우 캐릭터의 y 좌표가 200보다 크면
